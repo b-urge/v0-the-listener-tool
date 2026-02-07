@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import type { Understanding, ListenerMode } from "@/lib/types"
-import { processInput } from "./actions"
+import type { ListenerMode } from "@/lib/types"
+import type { AnalysisResult, SuggestedTheme } from "@/lib/text-engine"
+import { analyze } from "@/lib/text-engine"
 import { SignalIndicator } from "@/components/signal-indicator"
 import { InputPanel } from "@/components/input-panel"
 import { UnderstandingPanel } from "@/components/understanding-panel"
@@ -11,34 +12,40 @@ import { ChangesPanel } from "@/components/changes-panel"
 import { ModeToggle } from "@/components/mode-toggle"
 
 export default function ListenerPage() {
-  const [understanding, setUnderstanding] = useState<Understanding | null>(null)
-  const [previousInputs, setPreviousInputs] = useState<string[]>([])
+  const [understanding, setUnderstanding] = useState<AnalysisResult | null>(
+    null,
+  )
+  const [inputs, setInputs] = useState<string[]>([])
   const [mode, setMode] = useState<ListenerMode>("interpretive")
   const [isProcessing, setIsProcessing] = useState(false)
-  const [inputCount, setInputCount] = useState(0)
 
   const handleSubmit = useCallback(
-    async (text: string) => {
+    (text: string, attachments: { type: string; name: string; content: string }[]) => {
       setIsProcessing(true)
-      try {
-        const result = await processInput(
-          text,
-          previousInputs,
-          understanding,
-          mode
-        )
-        if (result) {
-          setUnderstanding(result as Understanding)
+
+      // Build the full input string from text + attachments
+      let fullInput = text
+      for (const att of attachments) {
+        if (att.type === "url") {
+          fullInput += `\n[Link: ${att.content}]`
+        } else if (att.type === "file") {
+          fullInput += `\n[File "${att.name}"]: ${att.content}`
         }
-        setPreviousInputs((prev) => [...prev, text])
-        setInputCount((c) => c + 1)
-      } catch (error) {
-        console.error("[v0] Error processing input:", error)
-      } finally {
-        setIsProcessing(false)
       }
+
+      // Small delay to show processing state
+      setTimeout(() => {
+        const newInputs = [...inputs, fullInput]
+        const existingThemes: SuggestedTheme[] =
+          understanding?.suggestedThemes ?? []
+        const result = analyze(newInputs, understanding, existingThemes)
+
+        setInputs(newInputs)
+        setUnderstanding(result)
+        setIsProcessing(false)
+      }, 300)
     },
-    [previousInputs, understanding, mode]
+    [inputs, understanding],
   )
 
   const handleSuppressTheme = useCallback((id: string) => {
@@ -46,8 +53,8 @@ export default function ListenerPage() {
       if (!prev) return prev
       return {
         ...prev,
-        themes: prev.themes.map((t) =>
-          t.id === id ? { ...t, suppressed: true } : t
+        suggestedThemes: prev.suggestedThemes.map((t) =>
+          t.id === id ? { ...t, suppressed: true } : t,
         ),
       }
     })
@@ -58,8 +65,8 @@ export default function ListenerPage() {
       if (!prev) return prev
       return {
         ...prev,
-        themes: prev.themes.map((t) =>
-          t.id === id ? { ...t, name } : t
+        suggestedThemes: prev.suggestedThemes.map((t) =>
+          t.id === id ? { ...t, name, confirmed: true } : t,
         ),
       }
     })
@@ -70,22 +77,35 @@ export default function ListenerPage() {
       if (!prev) return prev
       return {
         ...prev,
-        themes: prev.themes.map((t) =>
-          t.id === id ? { ...t, weight } : t
+        suggestedThemes: prev.suggestedThemes.map((t) =>
+          t.id === id ? { ...t, weight } : t,
         ),
       }
     })
   }, [])
 
-  const suppressed = understanding?.themes.filter((t) => t.suppressed) ?? []
+  const handleConfirmTheme = useCallback((id: string) => {
+    setUnderstanding((prev) => {
+      if (!prev) return prev
+      return {
+        ...prev,
+        suggestedThemes: prev.suggestedThemes.map((t) =>
+          t.id === id ? { ...t, confirmed: true } : t,
+        ),
+      }
+    })
+  }, [])
+
+  const suppressed =
+    understanding?.suggestedThemes.filter((t) => t.suppressed) ?? []
 
   const handleRestoreTheme = useCallback((id: string) => {
     setUnderstanding((prev) => {
       if (!prev) return prev
       return {
         ...prev,
-        themes: prev.themes.map((t) =>
-          t.id === id ? { ...t, suppressed: false } : t
+        suggestedThemes: prev.suggestedThemes.map((t) =>
+          t.id === id ? { ...t, suppressed: false } : t,
         ),
       }
     })
@@ -101,15 +121,15 @@ export default function ListenerPage() {
               The Listener
             </h1>
             <p className="text-[10px] tracking-widest uppercase text-muted-foreground/40 leading-tight">
-              Sense-making for the airwaves
+              Tune into your own noise
             </p>
           </div>
           <SignalIndicator active={isProcessing} />
         </div>
         <div className="flex items-center gap-4">
-          {inputCount > 0 && (
+          {inputs.length > 0 && (
             <span className="text-xs text-muted-foreground/40">
-              {inputCount} {inputCount === 1 ? "fragment" : "fragments"} received
+              {inputs.length} {inputs.length === 1 ? "note" : "notes"} received
             </span>
           )}
           <ModeToggle mode={mode} onChange={setMode} />
@@ -141,6 +161,7 @@ export default function ListenerPage() {
               onSuppressTheme={handleSuppressTheme}
               onRenameTheme={handleRenameTheme}
               onReweightTheme={handleReweightTheme}
+              onConfirmTheme={handleConfirmTheme}
             />
           </div>
 
@@ -148,7 +169,9 @@ export default function ListenerPage() {
           {suppressed.length > 0 && (
             <div className="px-6 lg:px-10 pb-2">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs text-muted-foreground/30">Suppressed:</span>
+                <span className="text-xs text-muted-foreground/30">
+                  Suppressed:
+                </span>
                 {suppressed.map((t) => (
                   <button
                     key={t.id}
@@ -165,7 +188,12 @@ export default function ListenerPage() {
 
           {/* Input area */}
           <div className="p-6 lg:px-10 border-t border-border/30">
-            <InputPanel onSubmit={handleSubmit} isProcessing={isProcessing} hasUnderstanding={!!understanding} />
+            <InputPanel
+              onSubmit={handleSubmit}
+              isProcessing={isProcessing}
+              hasUnderstanding={!!understanding}
+              noteCount={inputs.length}
+            />
           </div>
         </section>
 

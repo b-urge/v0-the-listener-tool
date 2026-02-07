@@ -1,14 +1,17 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import type { Theme, ListenerMode } from "@/lib/types"
+import type { SuggestedTheme } from "@/lib/text-engine"
+import type { ListenerMode } from "@/lib/types"
 
 interface ThemeTagProps {
-  theme: Theme
+  theme: SuggestedTheme
   mode: ListenerMode
   onSuppress: (id: string) => void
   onRename: (id: string, name: string) => void
   onReweight: (id: string, weight: number) => void
+  onConfirm: (id: string) => void
+  isSuggestion?: boolean
 }
 
 export function ThemeTag({
@@ -17,6 +20,8 @@ export function ThemeTag({
   onSuppress,
   onRename,
   onReweight,
+  onConfirm,
+  isSuggestion = false,
 }: ThemeTagProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editValue, setEditValue] = useState(theme.name)
@@ -39,7 +44,8 @@ export function ThemeTag({
     }
     if (showMenu) {
       document.addEventListener("mousedown", handleClickOutside)
-      return () => document.removeEventListener("mousedown", handleClickOutside)
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside)
     }
   }, [showMenu])
 
@@ -51,7 +57,7 @@ export function ThemeTag({
     setShowMenu(false)
   }
 
-  const weightOpacity = Math.max(0.3, Math.min(1, theme.weight))
+  const weightOpacity = Math.max(0.4, Math.min(1, theme.weight + 0.3))
 
   return (
     <div className="relative" ref={menuRef}>
@@ -73,14 +79,32 @@ export function ThemeTag({
       ) : (
         <button
           type="button"
-          onClick={() => setShowMenu(!showMenu)}
-          className="px-3 py-1.5 text-xs rounded border border-border/50 bg-secondary/50 text-secondary-foreground hover:border-primary/30 transition-colors cursor-pointer"
+          onClick={() => {
+            if (isSuggestion) {
+              onConfirm(theme.id)
+            } else {
+              setShowMenu(!showMenu)
+            }
+          }}
+          className={`px-3 py-1.5 text-xs rounded border transition-colors cursor-pointer ${
+            isSuggestion
+              ? "border-dashed border-border/50 bg-secondary/30 text-secondary-foreground/70 hover:border-primary/30 hover:bg-secondary/50"
+              : "border-border/50 bg-secondary/50 text-secondary-foreground hover:border-primary/30"
+          }`}
           style={{ opacity: weightOpacity }}
+          title={
+            isSuggestion
+              ? "Click to confirm this theme"
+              : "Click to edit this theme"
+          }
         >
+          {isSuggestion && (
+            <span className="mr-1.5 text-muted-foreground/40">+</span>
+          )}
           {theme.name}
-          {mode === "instrument" && (
-            <span className="ml-2 text-muted-foreground/50">
-              {theme.description}
+          {mode === "instrument" && theme.keywords.length > 0 && (
+            <span className="ml-2 text-muted-foreground/40 text-[10px]">
+              {theme.keywords.slice(0, 2).join(", ")}
             </span>
           )}
         </button>

@@ -1,15 +1,16 @@
 "use client"
 
-import type { Pattern, ListenerMode } from "@/lib/types"
+import type { DetectedPattern } from "@/lib/text-engine"
+import type { ListenerMode } from "@/lib/types"
 
-const strengthLabels: Record<Pattern["strength"], string> = {
+const strengthLabels: Record<DetectedPattern["strength"], string> = {
   emerging: "Just appearing",
   growing: "Gaining presence",
   steady: "Holding steady",
   fading: "Fading quietly",
 }
 
-const strengthDots: Record<Pattern["strength"], number> = {
+const strengthDots: Record<DetectedPattern["strength"], number> = {
   emerging: 1,
   growing: 2,
   steady: 3,
@@ -17,7 +18,7 @@ const strengthDots: Record<Pattern["strength"], number> = {
 }
 
 interface PatternsPanelProps {
-  patterns: Pattern[]
+  patterns: DetectedPattern[]
   mode: ListenerMode
 }
 
@@ -26,7 +27,7 @@ export function PatternsPanel({ patterns, mode }: PatternsPanelProps) {
     return (
       <div className="py-8 text-center">
         <p className="text-xs text-muted-foreground/40 italic">
-          Patterns will surface as signals accumulate
+          Patterns will surface as notes accumulate
         </p>
       </div>
     )

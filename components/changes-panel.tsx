@@ -1,9 +1,9 @@
 "use client"
 
-import type { Change } from "@/lib/types"
+import type { DetectedChange } from "@/lib/text-engine"
 
 interface ChangesPanelProps {
-  changes: Change[]
+  changes: DetectedChange[]
 }
 
 export function ChangesPanel({ changes }: ChangesPanelProps) {
@@ -11,7 +11,7 @@ export function ChangesPanel({ changes }: ChangesPanelProps) {
     return (
       <div className="py-8 text-center">
         <p className="text-xs text-muted-foreground/40 italic">
-          Changes will appear as understanding evolves
+          Changes will appear as the picture evolves
         </p>
       </div>
     )

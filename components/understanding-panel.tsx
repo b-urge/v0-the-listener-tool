@@ -1,14 +1,16 @@
 "use client"
 
-import type { Understanding, ListenerMode } from "@/lib/types"
+import type { ListenerMode } from "@/lib/types"
+import type { AnalysisResult, SuggestedTheme } from "@/lib/text-engine"
 import { ThemeTag } from "./theme-tag"
 
 interface UnderstandingPanelProps {
-  understanding: Understanding | null
+  understanding: AnalysisResult | null
   mode: ListenerMode
   onSuppressTheme: (id: string) => void
   onRenameTheme: (id: string, name: string) => void
   onReweightTheme: (id: string, weight: number) => void
+  onConfirmTheme: (id: string) => void
 }
 
 export function UnderstandingPanel({
@@ -17,6 +19,7 @@ export function UnderstandingPanel({
   onSuppressTheme,
   onRenameTheme,
   onReweightTheme,
+  onConfirmTheme,
 }: UnderstandingPanelProps) {
   if (!understanding) {
     return (
@@ -25,35 +28,37 @@ export function UnderstandingPanel({
           <div className="h-2 w-2 rounded-full bg-primary/40 animate-pulse-slow" />
         </div>
         <h2 className="font-serif text-2xl text-foreground/80 leading-relaxed mb-4 text-balance">
-          The Listener is waiting for signals
+          The Listener is waiting
         </h2>
 
-        {/* Concept explanation */}
+        {/* Concept intro */}
         <div className="mb-8 max-w-md text-left">
           <p className="text-sm text-muted-foreground/60 leading-relaxed mb-3">
-            Amateur radio (or ham radio) is a hobby where people use radios to
-            talk to each other -- sometimes across town, sometimes across the
-            world. Operators spend a lot of time just listening: scanning
-            through frequencies, catching bits of conversation, noticing when
-            things get busy or go quiet.
+            Ham radio operators spend hours scanning the airwaves, catching
+            fragments of conversation and noting what{"'"}s active, what{"'"}s quiet,
+            and what just changed. Over time, a picture forms from all those
+            small observations.
           </p>
-          <p className="text-sm text-muted-foreground/50 leading-relaxed">
-            <span className="text-foreground/70">The Listener</span> is a tool
-            for that kind of noticing. Tell it what you{"'"}re hearing on the
-            radio -- even just small things -- and it{"'"}ll build up a picture of
-            what{"'"}s going on over time. You don{"'"}t need to be precise. Just
-            describe what you notice.
+          <p className="text-sm text-muted-foreground/50 leading-relaxed mb-3">
+            <span className="text-foreground/70">The Listener</span> borrows
+            that idea. It{"'"}s a tool for turning messy input -- notes, links,
+            files, stray thoughts -- into something organized. Drop things in,
+            and it{"'"}ll find the threads. You stay in control of what matters.
+          </p>
+          <p className="text-sm text-muted-foreground/40 leading-relaxed">
+            No AI, no cloud processing. Everything runs right here in your
+            browser.
           </p>
         </div>
 
         <div className="w-full flex flex-col gap-3 text-left">
           <p className="text-xs tracking-widest uppercase text-muted-foreground/30 mb-1">
-            Try something like
+            Try dropping in something like
           </p>
           {[
-            "I keep hearing the same voice on one channel, repeating something every few minutes",
-            "There's a lot more chatter tonight than usual -- people seem to be talking about a storm",
-            "Everything went really quiet on the frequencies I usually listen to",
+            "Need to follow up with the design team about the new layout. Also, budget review is Thursday.",
+            "Interesting article about remote work trends. Reminds me of what Sarah mentioned last week.",
+            "Project deadline moved to March. Team morale seems low. Should probably address that.",
           ].map((example) => (
             <div
               key={example}
@@ -63,16 +68,20 @@ export function UnderstandingPanel({
             </div>
           ))}
           <p className="text-xs text-muted-foreground/30 mt-2 leading-relaxed">
-            Each thing you share gets added to the bigger picture. Over time,
-            themes show up, patterns form, and you{"'"}ll see suggestions for what
-            to pay attention to next.
+            Each note gets added to the picture. Themes will appear as topics
+            repeat. You can confirm, rename, or suppress any theme that shows
+            up. Attach files or links for richer input.
           </p>
         </div>
       </div>
     )
   }
 
-  const activeThemes = understanding.themes.filter((t) => !t.suppressed)
+  const activeThemes = understanding.suggestedThemes.filter(
+    (t) => !t.suppressed,
+  )
+  const confirmed = activeThemes.filter((t) => t.confirmed)
+  const suggested = activeThemes.filter((t) => !t.confirmed)
 
   return (
     <div className="flex flex-col gap-8 animate-fade-in">
@@ -86,14 +95,14 @@ export function UnderstandingPanel({
         </p>
       </div>
 
-      {/* Themes */}
-      {activeThemes.length > 0 && (
+      {/* Confirmed themes */}
+      {confirmed.length > 0 && (
         <div>
           <h3 className="text-xs tracking-widest uppercase text-muted-foreground/50 mb-3">
-            {mode === "interpretive" ? "Emerging Themes" : "Active Bands"}
+            {mode === "interpretive" ? "Your Themes" : "Confirmed Signals"}
           </h3>
           <div className="flex flex-wrap gap-2">
-            {activeThemes.map((theme) => (
+            {confirmed.map((theme) => (
               <ThemeTag
                 key={theme.id}
                 theme={theme}
@@ -101,6 +110,36 @@ export function UnderstandingPanel({
                 onSuppress={onSuppressTheme}
                 onRename={onRenameTheme}
                 onReweight={onReweightTheme}
+                onConfirm={onConfirmTheme}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Suggested themes (not yet confirmed) */}
+      {suggested.length > 0 && (
+        <div>
+          <h3 className="text-xs tracking-widest uppercase text-muted-foreground/50 mb-2">
+            {mode === "interpretive"
+              ? "Suggested Themes"
+              : "Unconfirmed Signals"}
+          </h3>
+          <p className="text-xs text-muted-foreground/40 mb-3">
+            Click a theme to confirm it, or open the menu to rename, amplify,
+            or suppress.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {suggested.map((theme) => (
+              <ThemeTag
+                key={theme.id}
+                theme={theme}
+                mode={mode}
+                onSuppress={onSuppressTheme}
+                onRename={onRenameTheme}
+                onReweight={onReweightTheme}
+                onConfirm={onConfirmTheme}
+                isSuggestion
               />
             ))}
           </div>
