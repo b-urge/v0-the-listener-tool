@@ -160,7 +160,7 @@ export default function ListenerPage() {
 
           {/* Input area */}
           <div className="p-6 lg:px-10 border-t border-border/30">
-            <InputPanel onSubmit={handleSubmit} isProcessing={isProcessing} />
+            <InputPanel onSubmit={handleSubmit} isProcessing={isProcessing} hasUnderstanding={!!understanding} />
           </div>
         </section>
 
