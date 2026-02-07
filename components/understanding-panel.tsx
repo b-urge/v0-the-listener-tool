@@ -23,42 +23,101 @@ export function UnderstandingPanel({
 }: UnderstandingPanelProps) {
   if (!understanding) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 lg:py-20 text-center max-w-xl mx-auto">
-        <div className="h-16 w-16 rounded-full border border-border/30 flex items-center justify-center mb-6">
-          <div className="h-2 w-2 rounded-full bg-primary/40 animate-pulse-slow" />
-        </div>
-        <h2 className="font-serif text-2xl text-foreground/80 leading-relaxed mb-4 text-balance">
-          The Listener is waiting
-        </h2>
-
-        {/* Concept intro */}
-        <div className="mb-8 max-w-md text-left">
-          <p className="text-sm text-muted-foreground/60 leading-relaxed mb-3">
-            Ham radio operators spend hours scanning the airwaves, catching
-            fragments of conversation and noting what{"'"}s active, what{"'"}s quiet,
-            and what just changed. Over time, a picture forms from all those
-            small observations.
-          </p>
-          <p className="text-sm text-muted-foreground/50 leading-relaxed mb-3">
-            <span className="text-foreground/70">The Listener</span> borrows
-            that idea. It{"'"}s a tool for turning messy input -- notes, links,
-            files, stray thoughts -- into something organized. Drop things in,
-            and it{"'"}ll find the threads. You stay in control of what matters.
-          </p>
-          <p className="text-sm text-muted-foreground/40 leading-relaxed">
-            No AI, no cloud processing. Everything runs right here in your
-            browser.
-          </p>
+      <div className="flex flex-col py-10 lg:py-16 max-w-2xl mx-auto">
+        {/* Radio intro */}
+        <div className="flex items-start gap-5 mb-10">
+          <div className="h-12 w-12 shrink-0 rounded-full border border-primary/20 flex items-center justify-center mt-1">
+            <div className="h-2 w-2 rounded-full bg-primary/50 animate-pulse-slow" />
+          </div>
+          <div>
+            <h2 className="font-serif text-2xl text-foreground/90 leading-snug mb-1">
+              Inspired by ham radio
+            </h2>
+            <p className="text-xs tracking-widest uppercase text-muted-foreground/30">
+              A different way to organize your thoughts
+            </p>
+          </div>
         </div>
 
-        <div className="w-full flex flex-col gap-3 text-left">
+        <div className="flex flex-col gap-5 mb-10 text-sm leading-relaxed">
+          <p className="text-foreground/70">
+            <span className="text-foreground/90 font-medium">Ham radio</span>{" "}
+            (amateur radio) is a hobby where people build and operate their own
+            radio stations to communicate -- sometimes with a neighbor across
+            town, sometimes with someone on the other side of the planet. There
+            are over 3 million ham operators worldwide.
+          </p>
+          <p className="text-muted-foreground/70">
+            What makes it interesting isn{"'"}t just the talking. It{"'"}s the{" "}
+            <span className="text-foreground/80">listening</span>. Operators
+            spend most of their time scanning through frequencies, picking up
+            fragments: a weather report here, a distress call there, a group of
+            friends chatting about their day, a faint signal bouncing off the
+            atmosphere from thousands of miles away. None of it arrives neatly
+            organized. You hear pieces, and your brain starts connecting them --
+            noticing what{"'"}s getting louder, what went quiet, what{"'"}s new.
+          </p>
+          <p className="text-muted-foreground/60">
+            <span className="text-foreground/70">The Listener</span> works the
+            same way, but for your own information. Instead of radio signals,
+            you drop in your messy, everyday inputs -- notes from a meeting, a
+            link you saved, a thought that occurred to you at 2am, a file you
+            need to process. The tool scans through everything and starts
+            surfacing the patterns: what topics keep coming up, what{"'"}s shifting,
+            and what you might want to pay attention to next.
+          </p>
+          <p className="text-muted-foreground/50">
+            You stay in control. When the tool suggests a theme, you can confirm
+            it, rename it, amplify it, or suppress it entirely. Nothing runs in
+            the cloud -- it all happens right here in your browser.
+          </p>
+        </div>
+
+        {/* How it works */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+          {[
+            {
+              step: "1",
+              title: "Drop things in",
+              desc: "Type a note, paste a link, attach a file. Doesn't need to be organized.",
+            },
+            {
+              step: "2",
+              title: "Themes surface",
+              desc: "As you add more, repeated topics and patterns start to appear automatically.",
+            },
+            {
+              step: "3",
+              title: "You shape it",
+              desc: "Confirm what matters, rename what's mislabeled, suppress what's noise.",
+            },
+          ].map((item) => (
+            <div
+              key={item.step}
+              className="flex flex-col gap-2 p-4 rounded-lg border border-border/20 bg-card/30"
+            >
+              <span className="text-xs font-medium text-primary/60">
+                {item.step}
+              </span>
+              <p className="text-sm font-medium text-foreground/80">
+                {item.title}
+              </p>
+              <p className="text-xs text-muted-foreground/50 leading-relaxed">
+                {item.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* Examples */}
+        <div className="flex flex-col gap-3">
           <p className="text-xs tracking-widest uppercase text-muted-foreground/30 mb-1">
             Try dropping in something like
           </p>
           {[
-            "Need to follow up with the design team about the new layout. Also, budget review is Thursday.",
-            "Interesting article about remote work trends. Reminds me of what Sarah mentioned last week.",
-            "Project deadline moved to March. Team morale seems low. Should probably address that.",
+            "Had a long call with the client today. They're worried about the timeline but excited about the new feature direction.",
+            "Saved three articles about sustainable packaging this week. Definitely a trend I should look into more.",
+            "Team standup felt tense. I think people are overloaded. Maybe we should cut scope for the next sprint.",
           ].map((example) => (
             <div
               key={example}
@@ -67,11 +126,6 @@ export function UnderstandingPanel({
               {`"${example}"`}
             </div>
           ))}
-          <p className="text-xs text-muted-foreground/30 mt-2 leading-relaxed">
-            Each note gets added to the picture. Themes will appear as topics
-            repeat. You can confirm, rename, or suppress any theme that shows
-            up. Attach files or links for richer input.
-          </p>
         </div>
       </div>
     )
@@ -87,9 +141,14 @@ export function UnderstandingPanel({
     <div className="flex flex-col gap-8 animate-fade-in">
       {/* Summary */}
       <div>
-        <h2 className="text-xs tracking-widest uppercase text-muted-foreground/50 mb-4">
-          Current Understanding
+        <h2 className="text-xs tracking-widest uppercase text-muted-foreground/50 mb-1">
+          {mode === "interpretive"
+            ? "What the Listener Hears"
+            : "Current Signal Reading"}
         </h2>
+        <p className="text-[10px] text-muted-foreground/30 mb-4">
+          A summary of everything you{"'"}ve dropped in so far
+        </p>
         <p className="font-serif text-lg text-foreground leading-relaxed">
           {understanding.summary}
         </p>
@@ -149,9 +208,12 @@ export function UnderstandingPanel({
       {/* Next Steps */}
       {understanding.nextSteps.length > 0 && (
         <div>
-          <h3 className="text-xs tracking-widest uppercase text-muted-foreground/50 mb-3">
-            You Might Consider
+          <h3 className="text-xs tracking-widest uppercase text-muted-foreground/50 mb-1">
+            Worth Tuning Into
           </h3>
+          <p className="text-[10px] text-muted-foreground/30 mb-3">
+            Suggested next steps based on what keeps coming up
+          </p>
           <ul className="flex flex-col gap-2">
             {understanding.nextSteps.map((step, i) => (
               <li

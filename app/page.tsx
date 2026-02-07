@@ -121,7 +121,7 @@ export default function ListenerPage() {
               The Listener
             </h1>
             <p className="text-[10px] tracking-widest uppercase text-muted-foreground/40 leading-tight">
-              Tune into your own noise
+              Organize your noise, inspired by ham radio
             </p>
           </div>
           <SignalIndicator active={isProcessing} />
@@ -140,9 +140,12 @@ export default function ListenerPage() {
       <div className="flex-1 flex flex-col lg:flex-row">
         {/* Left sidebar - Patterns */}
         <aside className="lg:w-72 xl:w-80 border-b lg:border-b-0 lg:border-r border-border/30 p-6 order-2 lg:order-1">
-          <h2 className="text-xs tracking-widest uppercase text-muted-foreground/50 mb-4">
+          <h2 className="text-xs tracking-widest uppercase text-muted-foreground/50 mb-1">
             Patterns Forming
           </h2>
+          <p className="text-[10px] text-muted-foreground/30 mb-4">
+            Like frequencies getting stronger on the dial
+          </p>
           <PatternsPanel
             patterns={understanding?.patterns ?? []}
             mode={mode}
@@ -199,9 +202,12 @@ export default function ListenerPage() {
 
         {/* Right sidebar - Changes */}
         <aside className="lg:w-72 xl:w-80 border-t lg:border-t-0 lg:border-l border-border/30 p-6 order-3">
-          <h2 className="text-xs tracking-widest uppercase text-muted-foreground/50 mb-4">
+          <h2 className="text-xs tracking-widest uppercase text-muted-foreground/50 mb-1">
             What Changed Recently
           </h2>
+          <p className="text-[10px] text-muted-foreground/30 mb-4">
+            New signals picked up from your last input
+          </p>
           <ChangesPanel changes={understanding?.changes ?? []} />
         </aside>
       </div>

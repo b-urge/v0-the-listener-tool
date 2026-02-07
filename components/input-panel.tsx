@@ -164,9 +164,9 @@ export function InputPanel({
 
   const guidanceText = hasUnderstanding
     ? noteCount < 3
-      ? "Keep going -- a few more notes and the picture gets clearer"
-      : "Add another note to sharpen the picture"
-    : "Drop in notes, thoughts, links, or files. The Listener will find the threads."
+      ? "Keep going -- a few more inputs and the signal gets clearer"
+      : "Drop in another note to sharpen the picture"
+    : "Drop in notes, thoughts, links, or files -- like tuning across a band and noting what you hear"
 
   return (
     <div className="relative flex flex-col gap-2">
