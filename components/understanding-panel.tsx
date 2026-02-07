@@ -29,19 +29,20 @@ export function UnderstandingPanel({
         </h2>
 
         {/* Concept explanation */}
-        <div className="mb-8 max-w-md">
+        <div className="mb-8 max-w-md text-left">
           <p className="text-sm text-muted-foreground/60 leading-relaxed mb-3">
-            In amateur radio, operators tune into vast stretches of spectrum --
-            picking up faint transmissions, half-heard exchanges, and bursts of
-            activity from unknown sources. Meaning doesn{"'"}t arrive neatly. It
-            emerges slowly, from fragments.
+            Amateur radio (or ham radio) is a hobby where people use radios to
+            talk to each other -- sometimes across town, sometimes across the
+            world. Operators spend a lot of time just listening: scanning
+            through frequencies, catching bits of conversation, noticing when
+            things get busy or go quiet.
           </p>
           <p className="text-sm text-muted-foreground/50 leading-relaxed">
-            <span className="text-foreground/70">The Listener</span> works the
-            same way. Feed it observations about radio activity -- what you{"'"}re
-            hearing, what shifted, what appeared or went silent -- and it will
-            weave those fragments into an evolving picture of what{"'"}s happening
-            across the bands.
+            <span className="text-foreground/70">The Listener</span> is a tool
+            for that kind of noticing. Tell it what you{"'"}re hearing on the
+            radio -- even just small things -- and it{"'"}ll build up a picture of
+            what{"'"}s going on over time. You don{"'"}t need to be precise. Just
+            describe what you notice.
           </p>
         </div>
 
@@ -50,9 +51,9 @@ export function UnderstandingPanel({
             Try something like
           </p>
           {[
-            "Heard a repeating CW signal on 40 meters around 7.025 MHz, strong but fading",
-            "2-meter repeater traffic picked up this evening, mostly emergency-related",
-            "Quiet on 20 meters today -- usually busy with DX, but propagation seems off",
+            "I keep hearing the same voice on one channel, repeating something every few minutes",
+            "There's a lot more chatter tonight than usual -- people seem to be talking about a storm",
+            "Everything went really quiet on the frequencies I usually listen to",
           ].map((example) => (
             <div
               key={example}
@@ -62,10 +63,9 @@ export function UnderstandingPanel({
             </div>
           ))}
           <p className="text-xs text-muted-foreground/30 mt-2 leading-relaxed">
-            Each observation you add gets folded into the understanding.
-            Over time, themes emerge, patterns form, and gentle next
-            steps appear. You can rename, amplify, or suppress any theme
-            that surfaces.
+            Each thing you share gets added to the bigger picture. Over time,
+            themes show up, patterns form, and you{"'"}ll see suggestions for what
+            to pay attention to next.
           </p>
         </div>
       </div>

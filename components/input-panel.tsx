@@ -5,13 +5,13 @@ import React from "react"
 import { useState, useRef, useCallback, useEffect } from "react"
 
 const EXAMPLE_PLACEHOLDERS = [
-  "Heard a faint CW signal on 40 meters, steady but slowly fading...",
-  "2-meter repeater chatter picked up tonight, sounds weather-related...",
-  "20 meters went dead this afternoon -- propagation must have shifted...",
-  "Caught a new callsign on 15 meters, possibly South America...",
-  "The 80-meter band has been unusually noisy since yesterday...",
-  "FT8 activity on 30 meters is busier than I've ever seen it...",
-  "Local repeater went quiet mid-conversation, no idea why...",
+  "Hearing a repeating signal on one channel, comes and goes...",
+  "A lot more people talking tonight than usual...",
+  "Everything went quiet on the frequencies I normally listen to...",
+  "Picked up a voice I haven't heard before, very faint...",
+  "There's a buzzing sound that started about an hour ago...",
+  "Two people seem to be having a long conversation nearby...",
+  "The static is heavier tonight, hard to make anything out...",
 ]
 
 interface InputPanelProps {
