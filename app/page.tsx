@@ -1,214 +1,152 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import type { ListenerMode } from "@/lib/types"
-import type { AnalysisResult, SuggestedTheme } from "@/lib/text-engine"
-import { analyze } from "@/lib/text-engine"
-import { SignalIndicator } from "@/components/signal-indicator"
-import { InputPanel } from "@/components/input-panel"
-import { UnderstandingPanel } from "@/components/understanding-panel"
-import { PatternsPanel } from "@/components/patterns-panel"
-import { ChangesPanel } from "@/components/changes-panel"
-import { ModeToggle } from "@/components/mode-toggle"
+import { getBandAtPosition } from "@/lib/spectrum-data"
+import { WaveformCanvas } from "@/components/waveform-canvas"
+import { SpectrumStrip } from "@/components/spectrum-strip"
+import { BandDetail } from "@/components/band-detail"
+import { BandNav } from "@/components/band-nav"
 
 export default function ListenerPage() {
-  const [understanding, setUnderstanding] = useState<AnalysisResult | null>(
-    null,
-  )
-  const [inputs, setInputs] = useState<string[]>([])
-  const [mode, setMode] = useState<ListenerMode>("interpretive")
-  const [isProcessing, setIsProcessing] = useState(false)
+  const [tunePosition, setTunePosition] = useState(0.35)
+  const activeBand = getBandAtPosition(tunePosition)
 
-  const handleSubmit = useCallback(
-    (text: string, attachments: { type: string; name: string; content: string }[]) => {
-      setIsProcessing(true)
-
-      // Build the full input string from text + attachments
-      let fullInput = text
-      for (const att of attachments) {
-        if (att.type === "url") {
-          fullInput += `\n[Link: ${att.content}]`
-        } else if (att.type === "file") {
-          fullInput += `\n[File "${att.name}"]: ${att.content}`
-        }
-      }
-
-      // Small delay to show processing state
-      setTimeout(() => {
-        const newInputs = [...inputs, fullInput]
-        const existingThemes: SuggestedTheme[] =
-          understanding?.suggestedThemes ?? []
-        const result = analyze(newInputs, understanding, existingThemes)
-
-        setInputs(newInputs)
-        setUnderstanding(result)
-        setIsProcessing(false)
-      }, 300)
-    },
-    [inputs, understanding],
-  )
-
-  const handleSuppressTheme = useCallback((id: string) => {
-    setUnderstanding((prev) => {
-      if (!prev) return prev
-      return {
-        ...prev,
-        suggestedThemes: prev.suggestedThemes.map((t) =>
-          t.id === id ? { ...t, suppressed: true } : t,
-        ),
-      }
-    })
-  }, [])
-
-  const handleRenameTheme = useCallback((id: string, name: string) => {
-    setUnderstanding((prev) => {
-      if (!prev) return prev
-      return {
-        ...prev,
-        suggestedThemes: prev.suggestedThemes.map((t) =>
-          t.id === id ? { ...t, name, confirmed: true } : t,
-        ),
-      }
-    })
-  }, [])
-
-  const handleReweightTheme = useCallback((id: string, weight: number) => {
-    setUnderstanding((prev) => {
-      if (!prev) return prev
-      return {
-        ...prev,
-        suggestedThemes: prev.suggestedThemes.map((t) =>
-          t.id === id ? { ...t, weight } : t,
-        ),
-      }
-    })
-  }, [])
-
-  const handleConfirmTheme = useCallback((id: string) => {
-    setUnderstanding((prev) => {
-      if (!prev) return prev
-      return {
-        ...prev,
-        suggestedThemes: prev.suggestedThemes.map((t) =>
-          t.id === id ? { ...t, confirmed: true } : t,
-        ),
-      }
-    })
-  }, [])
-
-  const suppressed =
-    understanding?.suggestedThemes.filter((t) => t.suppressed) ?? []
-
-  const handleRestoreTheme = useCallback((id: string) => {
-    setUnderstanding((prev) => {
-      if (!prev) return prev
-      return {
-        ...prev,
-        suggestedThemes: prev.suggestedThemes.map((t) =>
-          t.id === id ? { ...t, suppressed: false } : t,
-        ),
-      }
-    })
+  const handleTune = useCallback((pos: number) => {
+    setTunePosition(pos)
   }, [])
 
   return (
     <main className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 border-b border-border/30">
-        <div className="flex items-center gap-4">
-          <div className="flex flex-col">
-            <h1 className="font-serif text-lg tracking-wide text-foreground leading-tight">
+      <header className="flex flex-col gap-6 px-6 lg:px-10 pt-8 pb-6">
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="font-serif text-2xl lg:text-3xl tracking-wide text-foreground leading-tight">
               The Listener
             </h1>
-            <p className="text-[10px] tracking-widest uppercase text-muted-foreground/40 leading-tight">
-              Organize your noise, inspired by ham radio
+            <p className="text-xs text-muted-foreground/50 mt-1 max-w-md leading-relaxed">
+              An interactive guide to the radio spectrum. Drag the tuner to
+              explore the invisible airwaves that surround you right now.
             </p>
           </div>
-          <SignalIndicator active={isProcessing} />
-        </div>
-        <div className="flex items-center gap-4">
-          {inputs.length > 0 && (
-            <span className="text-xs text-muted-foreground/40">
-              {inputs.length} {inputs.length === 1 ? "note" : "notes"} received
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="h-2 w-2 rounded-full bg-primary/50 animate-pulse-slow" />
+            <span className="text-[10px] tracking-widest uppercase text-muted-foreground/30">
+              On air
             </span>
-          )}
-          <ModeToggle mode={mode} onChange={setMode} />
+          </div>
         </div>
       </header>
 
-      {/* Main content */}
+      {/* Waveform display */}
+      <div className="h-40 lg:h-52 px-6 lg:px-10">
+        <WaveformCanvas band={activeBand} tunePosition={tunePosition} />
+      </div>
+
+      {/* Tuner strip */}
+      <div className="px-6 lg:px-10 py-4">
+        <SpectrumStrip
+          position={tunePosition}
+          onChange={handleTune}
+          activeBandId={activeBand?.id ?? null}
+        />
+      </div>
+
+      {/* Band navigation */}
+      <div className="px-6 lg:px-10 py-3 border-b border-border/20">
+        <BandNav
+          activeBandId={activeBand?.id ?? null}
+          onSelect={handleTune}
+        />
+      </div>
+
+      {/* Content area */}
       <div className="flex-1 flex flex-col lg:flex-row">
-        {/* Left sidebar - Patterns */}
-        <aside className="lg:w-72 xl:w-80 border-b lg:border-b-0 lg:border-r border-border/30 p-6 order-2 lg:order-1">
-          <h2 className="text-xs tracking-widest uppercase text-muted-foreground/50 mb-1">
-            Patterns Forming
-          </h2>
-          <p className="text-[10px] text-muted-foreground/30 mb-4">
-            Like frequencies getting stronger on the dial
-          </p>
-          <PatternsPanel
-            patterns={understanding?.patterns ?? []}
-            mode={mode}
-          />
-        </aside>
-
-        {/* Center - Understanding + Input */}
-        <section
-          className="flex-1 flex flex-col order-1 lg:order-2"
-          aria-label="Current understanding and input"
-        >
-          <div className="flex-1 p-6 lg:p-10 overflow-y-auto">
-            <UnderstandingPanel
-              understanding={understanding}
-              mode={mode}
-              onSuppressTheme={handleSuppressTheme}
-              onRenameTheme={handleRenameTheme}
-              onReweightTheme={handleReweightTheme}
-              onConfirmTheme={handleConfirmTheme}
-            />
-          </div>
-
-          {/* Suppressed themes bar */}
-          {suppressed.length > 0 && (
-            <div className="px-6 lg:px-10 pb-2">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs text-muted-foreground/30">
-                  Suppressed:
-                </span>
-                {suppressed.map((t) => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => handleRestoreTheme(t.id)}
-                    className="px-2 py-0.5 text-xs rounded border border-border/30 text-muted-foreground/40 hover:text-muted-foreground hover:border-border/50 transition-colors line-through"
-                  >
-                    {t.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Input area */}
-          <div className="p-6 lg:px-10 border-t border-border/30">
-            <InputPanel
-              onSubmit={handleSubmit}
-              isProcessing={isProcessing}
-              hasUnderstanding={!!understanding}
-              noteCount={inputs.length}
-            />
-          </div>
+        {/* Band detail - main content */}
+        <section className="flex-1 p-6 lg:p-10 lg:max-w-3xl">
+          <BandDetail band={activeBand} />
         </section>
 
-        {/* Right sidebar - Changes */}
-        <aside className="lg:w-72 xl:w-80 border-t lg:border-t-0 lg:border-l border-border/30 p-6 order-3">
-          <h2 className="text-xs tracking-widest uppercase text-muted-foreground/50 mb-1">
-            What Changed Recently
-          </h2>
-          <p className="text-[10px] text-muted-foreground/30 mb-4">
-            New signals picked up from your last input
-          </p>
-          <ChangesPanel changes={understanding?.changes ?? []} />
+        {/* Sidebar - what is ham radio */}
+        <aside className="lg:w-80 xl:w-96 border-t lg:border-t-0 lg:border-l border-border/20 p-6 lg:p-8">
+          <div className="lg:sticky lg:top-8 flex flex-col gap-6">
+            <div>
+              <h2 className="text-xs tracking-widest uppercase text-muted-foreground/40 mb-3">
+                What is ham radio?
+              </h2>
+              <div className="flex flex-col gap-3 text-sm text-muted-foreground/60 leading-relaxed">
+                <p>
+                  <span className="text-foreground/80">Ham radio</span>{" "}
+                  (amateur radio) is a hobby where people build and operate
+                  their own radio stations to talk to each other -- sometimes
+                  across town, sometimes across the world. There are over 3
+                  million operators worldwide.
+                </p>
+                <p>
+                  Unlike your phone or WiFi, ham radio uses no internet and no
+                  cell towers. Just a radio, an antenna, and the atmosphere.
+                  Signals travel by bouncing off layers of the sky, following the
+                  curve of the earth, or even reflecting off the Moon.
+                </p>
+                <p>
+                  What makes it interesting is the{" "}
+                  <span className="text-foreground/70">listening</span>. Most of
+                  the hobby is scanning through frequencies, picking up
+                  fragments of conversation, weather reports, coded messages, and
+                  faint signals from thousands of miles away. The spectrum above
+                  shows you what{"'"}s out there.
+                </p>
+              </div>
+            </div>
+
+            <div className="border-t border-border/20 pt-5">
+              <h3 className="text-xs tracking-widest uppercase text-muted-foreground/40 mb-3">
+                Quick facts
+              </h3>
+              <dl className="flex flex-col gap-3">
+                {[
+                  {
+                    term: "Operators worldwide",
+                    def: "Over 3 million licensed hams across every country on Earth",
+                  },
+                  {
+                    term: "Getting started",
+                    def: "A handheld radio costs around $30. A license exam is free in many countries.",
+                  },
+                  {
+                    term: "Range",
+                    def: "From a few miles on a handheld to literally bouncing signals off the Moon",
+                  },
+                  {
+                    term: "Why it matters",
+                    def: "When cell towers and internet go down in disasters, ham radio still works",
+                  },
+                ].map((item) => (
+                  <div key={item.term}>
+                    <dt className="text-xs text-foreground/60 font-medium">
+                      {item.term}
+                    </dt>
+                    <dd className="text-xs text-muted-foreground/50 leading-relaxed mt-0.5">
+                      {item.def}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+
+            <div className="border-t border-border/20 pt-5">
+              <h3 className="text-xs tracking-widest uppercase text-muted-foreground/40 mb-2">
+                About this tool
+              </h3>
+              <p className="text-xs text-muted-foreground/40 leading-relaxed">
+                The Listener is an educational explorer for the electromagnetic
+                spectrum. Every frequency range shown here carries real signals
+                right now -- radio stations, aircraft, amateur operators,
+                satellites, and more. Drag the tuner to discover what{"'"}s
+                invisible all around you.
+              </p>
+            </div>
+          </div>
         </aside>
       </div>
     </main>

@@ -12,8 +12,8 @@ const cormorant = Cormorant_Garamond({
 })
 
 export const metadata: Metadata = {
-  title: 'The Listener',
-  description: 'A quiet instrument for making sense of invisible signals',
+  title: 'The Listener -- Explore the Radio Spectrum',
+  description: 'An interactive guide to the electromagnetic spectrum. Drag the tuner to explore the invisible airwaves all around you and discover what ham radio operators hear.',
 }
 
 export const viewport: Viewport = {
