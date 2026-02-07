@@ -96,9 +96,14 @@ export default function ListenerPage() {
       {/* Header */}
       <header className="flex items-center justify-between px-6 py-4 border-b border-border/30">
         <div className="flex items-center gap-4">
-          <h1 className="font-serif text-lg tracking-wide text-foreground">
-            The Listener
-          </h1>
+          <div className="flex flex-col">
+            <h1 className="font-serif text-lg tracking-wide text-foreground leading-tight">
+              The Listener
+            </h1>
+            <p className="text-[10px] tracking-widest uppercase text-muted-foreground/40 leading-tight">
+              Sense-making for the airwaves
+            </p>
+          </div>
           <SignalIndicator active={isProcessing} />
         </div>
         <div className="flex items-center gap-4">

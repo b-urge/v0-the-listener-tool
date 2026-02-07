@@ -20,27 +20,39 @@ export function UnderstandingPanel({
 }: UnderstandingPanelProps) {
   if (!understanding) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 lg:py-20 text-center max-w-lg mx-auto">
+      <div className="flex flex-col items-center justify-center py-12 lg:py-20 text-center max-w-xl mx-auto">
         <div className="h-16 w-16 rounded-full border border-border/30 flex items-center justify-center mb-6">
           <div className="h-2 w-2 rounded-full bg-primary/40 animate-pulse-slow" />
         </div>
-        <h2 className="font-serif text-2xl text-foreground/80 leading-relaxed mb-3 text-balance">
+        <h2 className="font-serif text-2xl text-foreground/80 leading-relaxed mb-4 text-balance">
           The Listener is waiting for signals
         </h2>
-        <p className="text-sm text-muted-foreground/50 leading-relaxed mb-8">
-          Describe what you notice happening around you -- observations about
-          activity, signals, movement, or changes. Fragments are fine. The
-          Listener will weave them into a picture over time.
-        </p>
+
+        {/* Concept explanation */}
+        <div className="mb-8 max-w-md">
+          <p className="text-sm text-muted-foreground/60 leading-relaxed mb-3">
+            In amateur radio, operators tune into vast stretches of spectrum --
+            picking up faint transmissions, half-heard exchanges, and bursts of
+            activity from unknown sources. Meaning doesn{"'"}t arrive neatly. It
+            emerges slowly, from fragments.
+          </p>
+          <p className="text-sm text-muted-foreground/50 leading-relaxed">
+            <span className="text-foreground/70">The Listener</span> works the
+            same way. Feed it observations about radio activity -- what you{"'"}re
+            hearing, what shifted, what appeared or went silent -- and it will
+            weave those fragments into an evolving picture of what{"'"}s happening
+            across the bands.
+          </p>
+        </div>
 
         <div className="w-full flex flex-col gap-3 text-left">
           <p className="text-xs tracking-widest uppercase text-muted-foreground/30 mb-1">
             Try something like
           </p>
           {[
-            "A burst of short transmissions appeared near the coast, then went quiet",
-            "Something is repeating steadily from the east, like a heartbeat",
-            "The usual background noise dropped off suddenly in one area",
+            "Heard a repeating CW signal on 40 meters around 7.025 MHz, strong but fading",
+            "2-meter repeater traffic picked up this evening, mostly emergency-related",
+            "Quiet on 20 meters today -- usually busy with DX, but propagation seems off",
           ].map((example) => (
             <div
               key={example}
@@ -50,9 +62,9 @@ export function UnderstandingPanel({
             </div>
           ))}
           <p className="text-xs text-muted-foreground/30 mt-2 leading-relaxed">
-            Each observation you add will be folded into the understanding.
-            Over time, themes will emerge, patterns will form, and gentle next
-            steps will appear. You can rename, amplify, or suppress any theme
+            Each observation you add gets folded into the understanding.
+            Over time, themes emerge, patterns form, and gentle next
+            steps appear. You can rename, amplify, or suppress any theme
             that surfaces.
           </p>
         </div>
