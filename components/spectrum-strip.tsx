@@ -81,6 +81,12 @@ export function SpectrumStrip({
     [position, onChange],
   )
 
+  // Deterministic pseudo-random to avoid hydration mismatch
+  const seededRandom = (seed: number) => {
+    const x = Math.sin(seed * 9301 + 49297) * 49297
+    return x - Math.floor(x)
+  }
+
   return (
     <div className="flex flex-col gap-2">
       {/* Frequency readout */}
@@ -147,12 +153,13 @@ export function SpectrumStrip({
         })}
 
         {/* Signal activity dots */}
-        {BANDS.map((band) => {
+        {BANDS.map((band, bandIdx) => {
           const start = freqToPosition(band.startFreq)
           const end = freqToPosition(band.endFreq)
           const dots = Math.floor(band.signalDensity * 8)
           return Array.from({ length: dots }).map((_, i) => {
             const dotPos = start + ((end - start) * (i + 1)) / (dots + 1)
+            const dotOpacity = 0.4 + seededRandom(bandIdx * 100 + i) * 0.3
             return (
               <div
                 key={`${band.id}-${i}`}
@@ -160,7 +167,7 @@ export function SpectrumStrip({
                 style={{
                   left: `${dotPos * 100}%`,
                   backgroundColor: band.canvasColor,
-                  opacity: 0.4 + Math.random() * 0.3,
+                  opacity: dotOpacity,
                 }}
               />
             )
